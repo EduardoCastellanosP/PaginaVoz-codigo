@@ -1,0 +1,37 @@
+# Publica la página en Spaceship cada vez que haces push a la rama main.
+# Necesita 3 secretos en GitHub (Settings > Secrets and variables > Actions):
+#   FTP_SERVER    ej: server12.shared.spaceship.host
+#   FTP_USERNAME  ej: deploy@vozycodigo.com
+#   FTP_PASSWORD  la contraseña de esa cuenta FTP
+name: Publicar en Spaceship
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: # botón "Run workflow" para publicar a mano
+
+jobs:
+  publicar:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Descargar el código
+        uses: actions/checkout@v4
+
+      - name: Subir por FTP solo lo que cambió
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          protocol: ftps
+          local-dir: ./
+          server-dir: ./
+          exclude: |
+            **/.git*
+            **/.git*/**
+            .github/**
+            netlify/**
+            README.md
+            img/equipo/*.jpg
+            img/equipo/*.jpeg
+            img/equipo/*.png
